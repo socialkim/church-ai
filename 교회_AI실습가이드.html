@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교회를 위한 AI 실습 워크숍</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root {
+  --navy:#1B2D5B;--navy-deep:#0F1A3A;--navy-light:#E8ECF4;
+  --gold:#C5985A;--gold-light:#FBF5EC;--gold-dark:#9A7740;
+  --warm:#FAF8F5;--cream:#F5F2ED;
+  --sage:#5B7B6A;--sage-light:#EBF2EE;
+  --coral:#C4695A;--coral-light:#FDEEE9;
+  --plum:#7B5A8A;--plum-light:#F3EDF6;
+  --sky:#4A8DB7;--sky-light:#E8F3FA;
+  --rose:#B76A7A;--rose-light:#FAEEF1;
+  --txt:#1A1A2E;--body:#3A3A4A;--muted:#6B7280;
+  --border:#DDD8D0;--white:#FFFFFF;--card:#FAFAF8;
+  --radius:14px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --font:'Pretendard Variable',-apple-system,system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--warm);color:var(--txt);line-height:1.65;-webkit-font-smoothing:antialiased}
+.hero{background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 60%,#2A4070 100%);padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;background:var(--gold);opacity:.1;border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-80px;left:20%;width:320px;height:320px;background:var(--sage);opacity:.07;border-radius:50%}
+.hero-inner{position:relative;z-index:1;max-width:960px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:999px;padding:6px 18px;font-size:13px;color:var(--gold);font-weight:600;letter-spacing:.3px;margin-bottom:16px}
+.hero h1{font-size:clamp(26px,5vw,38px);font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-.02em}
+.hero .subtitle{font-size:clamp(15px,2.5vw,19px);color:rgba(255,255,255,.65);font-weight:500}
+.hero .verse{font-size:13px;color:var(--gold);opacity:.8;margin-top:14px;font-style:italic;line-height:1.6}
+.mode-bar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.mode-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:0}
+.mode-toggle{display:flex;background:var(--cream);border-radius:10px;padding:3px;margin:8px 16px}
+.mode-btn{padding:8px 20px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .2s;background:transparent;color:var(--muted)}
+.mode-btn.active{background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(27,45,91,.25)}
+.nav{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;padding:14px 16px;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;font-family:var(--font);white-space:nowrap}
+.nav-btn:hover{color:var(--body)}.nav-btn.active{color:var(--navy);border-bottom-color:var(--gold)}
+.main{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+.mode-panel{display:none}.mode-panel.active{display:block}
+.section{display:none}.section.active{display:block}
+.session-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.session-num{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.session-header h2{font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+.session-desc{font-size:.88rem;color:var(--muted);margin-bottom:1.5rem;padding-left:52px}
+.info-box{background:var(--navy-light);border-left:4px solid var(--navy);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:1rem 1.25rem;font-size:.88rem;color:var(--body);margin-bottom:1.5rem;line-height:1.7}
+.info-box strong{color:var(--navy)}
+.info-box.warn{background:var(--coral-light);border-left-color:var(--coral)}.info-box.warn strong{color:var(--coral)}
+.info-box.gold{background:var(--gold-light);border-left-color:var(--gold)}.info-box.gold strong{color:var(--gold-dark)}
+.prompt-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1rem;overflow:hidden;transition:border-color .2s}
+.prompt-card:hover{border-color:#ccc}
+.prompt-card-header{display:flex;align-items:center;gap:10px;padding:1rem 1.25rem;flex-wrap:wrap}
+.prompt-step{font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;flex-shrink:0;letter-spacing:.03em}
+.step-navy{background:var(--navy-light);color:var(--navy)}.step-sage{background:var(--sage-light);color:#3A5C48}
+.step-coral{background:var(--coral-light);color:#A14030}.step-gold{background:var(--gold-light);color:var(--gold-dark)}
+.step-plum{background:var(--plum-light);color:#5A3A6A}.step-sky{background:var(--sky-light);color:#2A6A90}
+.prompt-card-title{font-size:.92rem;font-weight:600;flex:1}
+.tool-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--cream);color:var(--muted);flex-shrink:0}
+.copy-btn{flex-shrink:0;width:34px;height:34px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--muted)}
+.copy-btn:hover{background:var(--navy-light);border-color:var(--navy);color:var(--navy)}
+.copy-btn.copied{background:var(--sage-light);border-color:var(--sage);color:var(--sage)}
+.copy-btn svg{width:16px;height:16px}
+.prompt-body{padding:0 1.25rem 1.25rem}
+.prompt-text{font-size:.84rem;line-height:1.75;color:var(--body);background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.15rem;white-space:pre-wrap;word-break:keep-all;font-family:var(--font);cursor:pointer;position:relative;transition:border-color .2s}
+.prompt-text:hover{border-color:#ccc}
+.prompt-text::after{content:'클릭하여 복사';position:absolute;top:8px;right:10px;font-size:11px;color:var(--muted);opacity:0;transition:opacity .2s}
+.prompt-text:hover::after{opacity:.6}
+.var-toggle{display:flex;align-items:center;gap:6px;padding:10px 1.25rem;border-top:1px solid var(--border);cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted);background:var(--card);transition:background .15s;user-select:none}
+.var-toggle:hover{background:var(--cream)}
+.var-toggle svg{width:14px;height:14px;transition:transform .2s}.var-toggle.open svg{transform:rotate(90deg)}
+.var-list{max-height:0;overflow:hidden;transition:max-height .35s ease}.var-list.open{max-height:3000px}
+.var-item{padding:10px 1.25rem;border-top:1px solid var(--border)}
+.var-item-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.var-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--navy-light);color:var(--navy)}
+.var-label{font-size:12px;font-weight:600;color:var(--body)}
+.var-prompt{font-size:.82rem;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:border-color .2s}
+.var-prompt:hover{border-color:var(--navy)}
+.workflow-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.workflow-card h3{font-size:.95rem;font-weight:700;margin-bottom:.75rem;color:var(--navy-deep)}
+.workflow-steps{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wf-step{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;background:var(--navy-light);color:var(--navy)}
+.wf-arrow{font-size:16px;color:var(--muted)}
+.section-divider{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:2rem 0 1rem;padding-bottom:8px;border-bottom:2px solid var(--gold);display:inline-block}
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.tool-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:700px){.tool-grid,.tool-grid-2{grid-template-columns:1fr}}
+.tool-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .25s;position:relative;box-shadow:var(--shadow)}
+.tool-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.tool-card.active{border-color:var(--navy);box-shadow:0 0 0 2px rgba(27,45,91,.25)}
+.tool-icon{font-size:28px;margin-bottom:8px}
+.tool-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.tool-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.tool-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.tool-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.pill{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:600}
+.accordion{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1);margin-bottom:8px}
+.accordion.open{margin-bottom:24px}
+.accordion-inner{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.tool-links{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.tool-link{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:#fff;transition:opacity .2s}
+.tool-link:hover{opacity:.85}
+.tool-link.chatgpt{background:linear-gradient(135deg,#10A37F,#1A7F64)}
+.tool-link.claude{background:linear-gradient(135deg,#D97757,#C4694A)}
+.tool-link.gemini{background:linear-gradient(135deg,#4285F4,#5E97F6)}
+.tool-link.suno{background:linear-gradient(135deg,#1A1A2E,#4A3F6B)}
+.tool-link.nbm{background:linear-gradient(135deg,#FF6F00,#FFA000)}
+.prompt-block{background:#F9FAFB;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;position:relative}
+.prompt-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.prompt-num{font-size:12px;font-weight:700;color:var(--navy);min-width:20px}
+.prompt-badge{font-size:11px;padding:2px 10px;border-radius:999px;font-weight:600}
+.prompt-badge.chatgpt{background:#E6F7F2;color:#0D7A5F}
+.prompt-badge.claude{background:var(--coral-light);color:#A14030}
+.prompt-badge.gemini{background:var(--sky-light);color:#2A6A90}
+.prompt-badge.suno{background:#EDEAF4;color:#3A2A5A}
+.prompt-badge.nbm{background:#FFF3E0;color:#E65100}
+.prompt-title{font-weight:600;font-size:14px;flex:1}
+.prompt-block .prompt-body{font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;color:var(--body);white-space:pre-wrap;word-break:keep-all;position:relative;line-height:1.7;cursor:pointer;transition:border-color .2s}
+.prompt-block .prompt-body:hover{border-color:var(--navy)}
+.prompt-block .prompt-body::after{content:'클릭하여 복사';position:absolute;top:8px;right:10px;font-size:10px;color:var(--muted);opacity:0;transition:opacity .2s}
+.prompt-block .prompt-body:hover::after{opacity:.6}
+.section-label{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block}
+.bonus-tag{background:var(--coral);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:4px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy-deep);color:#fff;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;transition:all .35s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.font-ctrl{position:fixed;bottom:20px;right:20px;display:flex;gap:6px;z-index:100}
+.font-ctrl button{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--white);font-size:15px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);transition:all .2s;font-family:var(--font)}
+.font-ctrl button:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+@media(max-width:600px){.workflow-steps{flex-direction:column}.wf-arrow{transform:rotate(90deg)}.mode-inner{flex-direction:column;padding:8px}.mode-toggle{margin:0 0 4px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">✝ 교회를 위한 AI 실습 워크숍</div>
+    <h1>AI 실습 가이드</h1>
+    <p class="subtitle">받은 달란트를 지혜롭게 활용하는 법</p>
+  </div>
+</div>
+
+<div class="mode-bar">
+  <div class="mode-inner">
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="switchMode('scenario')">📋 실습별</button>
+      <button class="mode-btn" onclick="switchMode('tools')">🔧 도구별</button>
+    </div>
+    <div class="nav" id="scenario-nav">
+      <button class="nav-btn active" data-tab="s1">① AI 첫걸음</button>
+      <button class="nav-btn" data-tab="s2">② 성경공부·QT</button>
+      <button class="nav-btn" data-tab="s3">③ 교회 봉사</button>
+      <button class="nav-btn" data-tab="s4">④ 신앙 교육</button>
+      <button class="nav-btn" data-tab="s5">⑤ 이미지·미디어</button>
+      <button class="nav-btn" data-tab="s6">⑥ 찬양 만들기</button>
+      <button class="nav-btn" data-tab="tips">프롬프트 원칙</button>
+      <button class="nav-btn" data-tab="ethics">⚠️ 주의사항</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+<div class="mode-panel active" id="panel-scenario">
+
+<!-- ── S1: AI 첫걸음 ── -->
+<div class="section active" id="sec-s1">
+  <div class="session-header"><div class="session-num" style="background:var(--navy)">1</div><h2>AI 첫걸음 — 처음 써보는 생성형 AI</h2></div>
+  <p class="session-desc">스마트폰으로 ChatGPT, Claude, Gemini에 처음 말을 걸어봅니다. 어렵지 않습니다!</p>
+  <div class="info-box"><strong>달란트 비유와 AI</strong> — 마태복음 25장에서 주인은 종들에게 재능대로 달란트를 맡겼습니다. 다섯 달란트 받은 종은 다섯을 더 남겼고, 한 달란트 받은 종은 땅에 묻어두었습니다. AI는 우리 시대에 주어진 새로운 달란트입니다. 땅에 묻어둘 것인가, 지혜롭게 활용할 것인가 — 오늘 그 첫걸음을 함께 내딛어 봅시다.</div>
+  <div class="info-box"><strong>사전 준비</strong> — 스마트폰에 아래 앱 중 하나를 설치해 주세요. 모두 무료로 시작할 수 있습니다.<br>• <strong>ChatGPT</strong> (OpenAI) — App Store / Play Store<br>• <strong>Claude</strong> (Anthropic) — App Store / Play Store<br>• <strong>Gemini</strong> (Google) — App Store / Play Store</div>
+  <div class="workflow-card"><h3>오늘의 흐름</h3><div class="workflow-steps"><span class="wf-step">📱 앱 설치</span><span class="wf-arrow">→</span><span class="wf-step">💬 첫 대화</span><span class="wf-arrow">→</span><span class="wf-step">📸 사진 활용</span><span class="wf-arrow">→</span><span class="wf-step">🎤 음성 대화</span></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">STEP 1</span><span class="prompt-card-title">AI에게 첫 인사 — 나를 소개하기</span><span class="tool-badge">ChatGPT / Claude / Gemini</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">안녕! 나는 교회에서 봉사하고 있는 성도야. AI를 처음 써보는 중인데, 앞으로 성경공부 자료 만들기, 교회 홍보물 아이디어 정리, 일상 궁금증 해결에 너를 활용해보려고 해.
+
+먼저 너에게 질문하는 좋은 방법을 3가지만 알려줘. 쉽게 설명해줘.</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">STEP 2</span><span class="prompt-card-title">사진 찍어서 물어보기 — 이미지 인식 체험</span><span class="tool-badge">ChatGPT / Gemini</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">[📸 주변 사물, 식물, 음식 등을 사진으로 찍어 첨부한 뒤]
+
+이 사진에 있는 것이 무엇인지 알려주고, 관련된 재미있는 사실 3가지를 알려줘.</div></div>
+  <div class="var-toggle" onclick="toggleVar(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>Variation 3개</div><div class="var-list"><div class="var-item"><div class="var-item-header"><span class="var-badge">V1</span><span class="var-label">주보/안내문 사진</span></div><div class="var-prompt" onclick="copyText(this)">이 주보(안내문)를 읽고 핵심 내용을 3줄로 요약해줘</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">V2</span><span class="var-label">손글씨 메모</span></div><div class="var-prompt" onclick="copyText(this)">이 손글씨 메모를 읽어서 깔끔하게 정리해줘</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">V3</span><span class="var-label">영어 간판/메뉴판</span></div><div class="var-prompt" onclick="copyText(this)">이 영어 메뉴판(간판)을 한국어로 번역해줘. 발음도 같이 적어줘</div></div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">STEP 3</span><span class="prompt-card-title">음성으로 AI와 대화하기</span><span class="tool-badge">ChatGPT 음성모드</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">[🎤 ChatGPT 앱 하단 헤드폰 아이콘을 눌러 음성 모드 시작]
+
+"오늘 저녁에 간단하게 만들 수 있는 한식 반찬 3가지 추천해줘. 재료는 집에 흔히 있는 것으로."
+
+→ 음성으로 자연스럽게 대화해보세요!</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-gold">STEP 4</span><span class="prompt-card-title">AI 도구 3종 비교 체험</span><span class="tool-badge">ChatGPT + Claude + Gemini</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">"감사"라는 주제로 짧은 묵상 글을 써줘.
+
+조건:
+- 분량: 5~6문장
+- 톤: 따뜻하고 위로가 되는
+- 일상의 작은 감사를 발견하는 내용으로
+
+→ 같은 프롬프트를 ChatGPT, Claude, Gemini에 각각 넣어보고 결과를 비교해보세요!</div></div></div>
+</div>
+
+<!-- ── S2: 성경공부 & QT ── -->
+<div class="section" id="sec-s2">
+  <div class="session-header"><div class="session-num" style="background:var(--sage)">2</div><h2>성경공부 & QT 자료 만들기</h2></div>
+  <p class="session-desc">AI를 활용해 말씀 묵상 질문지, QT 자료, 소그룹 나눔 가이드를 만들어봅니다.</p>
+  <div class="info-box gold"><strong>핵심 원칙</strong> — AI가 만든 성경 해석은 반드시 원문 성경과 대조하세요. AI는 보조 도구이며, 신학적 판단은 목사님(전도사님)과 본인의 몫입니다. "여호와를 경외하는 것이 지식의 근본"(잠 1:7)임을 기억합시다.</div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">실습 1</span><span class="prompt-card-title">주간 QT 자료 만들기 (5일 분량)</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">골로새서 3:12-17 본문으로, 월~금 5일 QT 자료를 만들어줘.
+
+각 날짜는 다음 형식을 지켜줘:
+- 오늘의 말씀 (본문 중 한 구절의 요지)
+- 묵상 가이드 (쉬운 언어 3문장)
+- 삶에 적용하는 질문 (2개)
+- 마무리 기도문 (2줄)
+
+청중: 30~50대 직장인 성도
+톤: 따뜻하고 실천적</div></div>
+  <div class="var-toggle" onclick="toggleVar(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>Variation 3개</div><div class="var-list"><div class="var-item"><div class="var-item-header"><span class="var-badge">V1</span><span class="var-label">청소년용</span></div><div class="var-prompt" onclick="copyText(this)">같은 본문으로 중고등학생이 이해할 수 있는 쉬운 표현으로 바꿔줘. 예시도 학교생활 맥락으로</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">V2</span><span class="var-label">부부/가정용</span></div><div class="var-prompt" onclick="copyText(this)">부부가 함께 읽고 나눌 수 있도록 적용 질문을 가정생활 중심으로 바꿔줘</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">V3</span><span class="var-label">카카오톡 공유용</span></div><div class="var-prompt" onclick="copyText(this)">Day 1 내용을 카카오톡으로 바로 보낼 수 있게 이모지 포함, 짧고 임팩트 있게 편집해줘</div></div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">실습 2</span><span class="prompt-card-title">소그룹 성경공부 질문지 — 귀납법(관찰-해석-적용)</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">마태복음 25:14-30 (달란트 비유)을 기반으로 소그룹 성경공부 자료를 만들어줘.
+
+포함할 내용:
+- 관찰 질문 3개 (본문에서 직접 찾을 수 있는 사실)
+- 해석 질문 2개 (본문의 의미를 깊이 생각하는 질문)
+- 적용 질문 2개 (오늘 내 삶에 어떻게 적용할 수 있는가)
+  → 특히 "AI 시대에 우리에게 주어진 달란트를 어떻게 활용할 것인가"를 포함
+- 함께 읽을 참고 구절 2~3개
+- 가정에서의 묵상 과제 1개
+
+대상: 30~40대 직장인 소그룹
+형식: 순장(리더)이 바로 사용할 수 있는 깔끔한 양식</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">실습 3</span><span class="prompt-card-title">원어(헬라어/히브리어) 단어 연구 보조</span><span class="tool-badge">Claude / ChatGPT</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">로마서 8:28의 "합력하여 선을 이루느니라"에서 핵심 헬라어 단어를 분석해줘.
+
+다음을 포함해서 정리해줘:
+1. 핵심 헬라어 단어 (원어, 음역, 뜻)
+2. 해당 단어가 신약성경에서 쓰인 다른 구절 2~3개
+3. 이 단어의 문맥적 의미 (당시 독자가 이해했을 뉘앙스)
+4. 한국어 성경 번역(개역개정)과 원어의 차이점이 있다면
+
+주의: 확실하지 않은 정보에는 [확인 필요]를 표시해줘</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-gold">실습 4</span><span class="prompt-card-title">설교 예화 찾기 (4단계 프롬프트)</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">요한복음 15장 13절 "친구를 위하여 자기 목숨을 버리면 이보다 더 큰 사랑이 없나니" 말씀을 주제로,
+
+1. 예화 종류: 역사 속 인물
+2. 청중: 장년부 성도
+3. 톤: 감동적이되 과장 없이
+4. 분량: 3~4문장으로 요약
+
+위 조건에 맞는 예화를 제시해줘.
+※ 예화의 사실관계를 확인할 수 있도록 인물명과 시대를 명시해줘</div></div></div>
+</div>
+
+<!-- ── S3: 교회 봉사 ── -->
+<div class="section" id="sec-s3">
+  <div class="session-header"><div class="session-num" style="background:var(--coral)">3</div><h2>교회 봉사 실무 — 행정·홍보·심방</h2></div>
+  <p class="session-desc">주보 문구 작성, 행사 기획, 기도문 초안, 심방 준비 등 봉사 현장에서 바로 쓸 수 있는 프롬프트입니다.</p>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">실습 1</span><span class="prompt-card-title">주보 행사 광고 문구 만들기</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">아래 행사 정보를 바탕으로 주보용 광고 문구를 작성해줘.
+
+행사 정보:
+- 행사명: 이웃과 함께하는 사랑 나눔 바자회
+- 일시: 6월 14일(토) 10:00~16:00
+- 장소: 교회 앞마당
+- 내용: 의류, 잡화, 먹거리, 수익금 전액 이웃 돕기
+- 대상: 전교인 + 지역 주민
+
+조건: 따뜻하고 정중한 톤, 150자 내외, 참여를 독려하는 마무리 한 문장</div></div>
+  <div class="var-toggle" onclick="toggleVar(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>Variation 2개</div><div class="var-list"><div class="var-item"><div class="var-item-header"><span class="var-badge">V1</span><span class="var-label">SNS용 변환</span></div><div class="var-prompt" onclick="copyText(this)">방금 바자회 내용을 청년·지역 주민 타겟으로 힙하고 재밌는 플리마켓 톤으로 바꿔줘. 인스타그램 피드용, 이모지 포함, 친근한 말투</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">V2</span><span class="var-label">문자 발송용</span></div><div class="var-prompt" onclick="copyText(this)">같은 내용을 문자 메시지용 80자 이내로 줄여줘. 날짜·장소·핵심 한 줄만</div></div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">실습 2</span><span class="prompt-card-title">대표기도 초안 작성</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">이번 주일 대표기도 초안을 작성해줘.
+
+포함할 간구:
+- 나라와 민족을 위한 기도 (경제적 어려움 속 소망)
+- 교회 공동체의 하나됨
+- 아픈 성도들의 회복
+
+조건: 차분하고 간절한 문체, 300자 내외, 개역개정 성경 표현에 익숙한 톤
+※ 이 초안은 반드시 기도자가 자신의 마음과 교회 상황에 맞게 수정한 후 사용하세요.</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">실습 3</span><span class="prompt-card-title">심방 위로 문자 + 기도문</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">오랜 질병으로 지친 성도에게 보낼 위로 문자와 짧은 기도문을 작성해줘.
+
+조건:
+- 문자: 3~4문장, 따뜻하되 부담스럽지 않게
+- 기도문: 2~3문장, 치유와 회복을 간구
+- 혼자가 아님을 느끼도록
+※ 민감한 개인정보(실명, 구체적 병명)는 AI에 입력하지 마세요.</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-gold">실습 4</span><span class="prompt-card-title">교회 연간 행사 계획 브레인스토밍</span><span class="tool-badge">ChatGPT / Claude / Gemini</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">교회 하반기(7~12월) 주요 행사 계획을 브레인스토밍 해줘.
+
+우리 교회 정보:
+- 규모: 중형교회 (출석 200~300명)
+- 구성: 유아부, 초등부, 중고등부, 청년부, 장년부, 시니어부
+- 확정 행사: 여름성경학교(8월), 추수감사절(11월), 성탄축제(12월)
+
+제안: 월별 행사, 부서 간 통합 행사 아이디어, 지역사회 연계 행사. 표 형태로 정리해줘</div></div></div>
+</div>
+
+<!-- ── S4: 신앙 교육 ── -->
+<div class="section" id="sec-s4">
+  <div class="session-header"><div class="session-num" style="background:var(--plum)">4</div><h2>신앙 교육 자료 제작</h2></div>
+  <p class="session-desc">주일학교 공과, 새가족반, 제자훈련, 가정예배 등 교육 현장에서 바로 쓸 수 있는 자료를 AI로 만듭니다.</p>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-plum">실습 1</span><span class="prompt-card-title">주일학교 — 어린이 눈높이 성경 이야기 + 퀴즈</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">너는 주일학교 초등부 저학년 선생님이야.
+
+마태복음 25:14-30 달란트 비유를 8살 아이들이 이해할 수 있게 쉬운 비유를 들어서 설명해줘. "달란트"를 아이들이 이해할 수 있는 "재능/선물" 개념으로 바꿔서 이야기해줘.
+
+그리고 설교 시작 전에 아이들의 주의를 집중시킬 수 있는 재미있는 OX 퀴즈 3개와, 아이들이 서로 이야기 나눌 수 있는 질문 1개를 만들어줘.</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">실습 2</span><span class="prompt-card-title">자녀 신앙 교육 — 가정 예배 가이드</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">초등학교 저학년 자녀와 함께하는 15분 가정예배 순서를 만들어줘.
+
+주제: "하나님이 주신 선물을 잘 사용하자" (마태복음 25:14-30 달란트 비유)
+
+포함: 찬양 추천 1곡, 말씀 읽기(3~4절 발췌), 아이 눈높이 설명(2~3분), 나눔 질문 1개, 가족 기도 제목, 마무리 기도 예시</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">실습 3</span><span class="prompt-card-title">새가족반 4주 커리큘럼 설계</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">4주 과정의 새가족반 커리큘럼을 설계해줘.
+
+대상: 교회에 처음 오신 분들 (기독교 배경이 없을 수도 있음)
+1회 분량: 50분 (강의 30분 + 나눔 20분)
+주차별: 주제, 핵심 메시지, 성경구절, 나눔 질문 2개, 과제 1개
+
+1주차: 하나님은 누구신가 / 2주차: 예수님은 왜 오셨나
+3주차: 성경은 어떤 책인가 / 4주차: 교회 생활 안내
+
+톤: 부담스럽지 않고 따뜻한</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">실습 4</span><span class="prompt-card-title">청년부 토론 — AI 시대와 신앙</span><span class="tool-badge">ChatGPT / Claude</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">20~30대 청년부 모임에서 "AI 시대와 신앙"을 주제로 토론 자료를 만들어줘.
+
+마태복음 25:14-30 달란트 비유를 출발점으로:
+1. 오프닝 질문: "AI라는 새로운 달란트를 우리는 어떻게 활용해야 할까?"
+2. 성경적 관점: 기술을 바라보는 성경의 시각 (창 1:28 문화명령, 잠 1:7 지혜의 시작)
+3. 토론 질문 3개:
+   - AI가 만든 설교를 들을 수 있는가?
+   - AI 시대에 그리스도인만이 가진 고유한 가치는?
+   - 달란트를 "땅에 묻는 것"은 AI 시대에 어떤 모습일까?
+4. 마무리 묵상 구절
+
+균형 잡힌 시각으로, 정답을 제시하기보다 생각을 이끌어내는 형식으로</div></div></div>
+</div>
+
+<!-- ── S5: 이미지·미디어 ── -->
+<div class="section" id="sec-s5">
+  <div class="session-header"><div class="session-num" style="background:var(--sky)">5</div><h2>AI로 이미지 만들기 — ChatGPT & Gemini</h2></div>
+  <p class="session-desc">ChatGPT의 GPT-4o 이미지 생성과 Gemini의 Nano Banana로 교회 홍보물, 교육 자료 이미지를 직접 만들어봅니다.</p>
+
+  <div class="info-box"><strong>2025~2026년 대폭 업그레이드!</strong><br>
+  • <strong>ChatGPT 이미지 생성</strong> (GPT-4o/GPT-5): 이미지 안에 한글 텍스트를 정확하게 넣을 수 있고, 사진을 올려서 수정·편집도 가능. 포스터, 인포그래픽, 만화까지 생성.<br>
+  • <strong>Gemini Nano Banana</strong>: 대화하면서 이미지를 반복 수정할 수 있는 "대화형 이미지 편집". 무료로 하루 20장 생성 가능. Nano Banana Pro는 4K 고해상도 지원.</div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sky">실습 1</span><span class="prompt-card-title">ChatGPT로 교회 행사 포스터 만들기</span><span class="tool-badge">ChatGPT 이미지 생성</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">여름성경학교 포스터를 만들어줘.
+
+포함할 텍스트:
+- 제목: "하나님의 용사! VBS 2026"
+- 날짜: 8월 4~6일 (월~수)
+- 시간: 오전 9시~12시
+- 장소: 교회 대예배당
+- 대상: 유치부~초등부
+
+디자인 조건:
+- 밝고 활기찬 여름 느낌, 모험 테마
+- 아이들이 좋아할 만화 스타일
+- 한글 텍스트가 정확하고 읽기 쉽게
+- 세로 포스터 형태 (3:4 비율)</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">실습 2</span><span class="prompt-card-title">ChatGPT로 성경 말씀 카드 만들기</span><span class="tool-badge">ChatGPT 이미지 생성</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">카카오톡/인스타그램에 공유할 수 있는 성경 말씀 카드 이미지를 만들어줘.
+
+텍스트:
+"잘하였도다 착하고 충성된 종아
+네가 적은 일에 충성하였으매
+내가 많은 것을 네게 맡기리니"
+— 마태복음 25:21
+
+디자인:
+- 따뜻한 크림/골드 톤 배경
+- 말씀이 크고 읽기 쉽게 (한글 정확히)
+- 하단에 성경 출처 작게
+- 정사각형 (1:1 비율)
+- 깔끔하고 절제된 느낌</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">실습 3</span><span class="prompt-card-title">Gemini로 교회학교 교재 삽화 만들기</span><span class="tool-badge">Gemini (Nano Banana)</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">[gemini.google.com 접속 → 프롬프트 입력]
+
+달란트 비유(마태복음 25:14-30)를 어린이 교재에 넣을 삽화로 만들어줘.
+
+장면 1: 주인이 세 종에게 달란트(금화 주머니)를 나눠주는 장면
+- 주인은 따뜻한 표정, 종들은 각각 다른 반응
+- 밝고 따뜻한 수채화 스타일
+- 고대 이스라엘 배경이지만 너무 사실적이지 않게, 어린이 그림책 느낌
+
+→ 결과가 나온 후 "두 번째 종의 표정을 더 밝게 바꿔줘" 같이 대화로 수정할 수 있어요!</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">실습 4</span><span class="prompt-card-title">Gemini로 SNS 카드뉴스 이미지 시리즈</span><span class="tool-badge">Gemini (Nano Banana)</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">"감사"를 주제로 인스타그램 카드뉴스 이미지 5장을 시리즈로 만들어줘.
+
+1장: 제목 카드 — "오늘, 감사를 연습합니다" (큰 타이포그래피)
+2장: 감사가 뇌에 미치는 과학적 효과 (간단한 인포그래픽)
+3장: 성경에서 말하는 감사 — "범사에 감사하라" (살전 5:18)
+4장: 오늘 실천할 수 있는 감사 습관 3가지 (아이콘 스타일)
+5장: 마무리 기도문 카드
+
+전체 시리즈 일관된 색상 톤 (파스텔 톤), 한글 텍스트 포함, 정사각형</div></div>
+  <div class="var-toggle" onclick="toggleVar(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>ChatGPT vs Gemini 이미지 생성 비교</div><div class="var-list"><div class="var-item"><div class="var-item-header"><span class="var-badge">비교</span><span class="var-label">어떤 도구를 언제 쓸까?</span></div><div class="var-prompt" onclick="copyText(this)">ChatGPT: 한글 텍스트가 정확해야 할 때 (포스터, 말씀카드), 사진 편집/수정할 때, 복잡한 인포그래픽
+Gemini: 대화하면서 반복 수정할 때, 무료로 많이 만들 때 (하루 20장), 일러스트/삽화 스타일</div></div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-plum">실습 5</span><span class="prompt-card-title">사진 편집 — 기존 사진을 AI로 변환</span><span class="tool-badge">ChatGPT 이미지 편집</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">[📸 교회 건물이나 모임 단체 사진을 ChatGPT에 업로드한 뒤]
+
+이 사진을 따뜻한 수채화 스타일의 일러스트로 변환해줘.
+교회 홈페이지나 주보 표지에 사용할 수 있는 느낌으로.
+
+→ ChatGPT의 이미지 편집 기능으로 기존 사진 스타일을 자유롭게 바꿀 수 있습니다!</div></div></div>
+</div>
+
+<!-- ── S6: 찬양 만들기 ── -->
+<div class="section" id="sec-s6">
+  <div class="session-header"><div class="session-num" style="background:var(--gold-dark)">6</div><h2>AI로 찬양 만들기 — Suno AI</h2></div>
+  <p class="session-desc">Suno AI로 어린이 찬양, 예배 찬양, 시즌별 특송을 직접 작곡해봅니다.</p>
+
+  <div class="info-box"><strong>Suno AI 사용법</strong> — suno.com에 접속 → Create → Custom 모드 선택. Style of Music(영어), Title, Lyrics(한국어 가사 + 구조 태그)를 입력하면 음악이 생성됩니다. 무료로 하루 10곡까지 가능!</div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-gold">실습 1</span><span class="prompt-card-title">어린이 찬양 — "하나님의 용사"</span><span class="tool-badge">Suno AI</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">Style: Korean children's worship, energetic, fun, upbeat children's choir, acoustic guitar, drums, bright, happy, 120 BPM
+
+Title: 하나님의 용사
+
+Lyrics:
+[Intro]
+(신나는 드럼+기타)
+
+[Verse 1]
+다윗처럼 담대하게
+두려움을 이겨내요
+하나님이 함께하면
+무엇이든 할 수 있어
+
+[Pre-Chorus]
+믿음으로 나아가
+주님 손을 잡으면
+
+[Chorus]
+우리는 하나님의 용사
+세상을 밝히는 빛
+작지만 강한 믿음으로
+오늘도 승리해요
+
+[Outro]
+하나님의 용사! 예!</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">실습 2</span><span class="prompt-card-title">예배 찬양 — 평안한 워십</span><span class="tool-badge">Suno AI</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">Style: worship, CCM, reverent, peaceful, piano, strings, Korean worship, gentle female vocal, 80 BPM
+
+Title: 주의 평안 속에
+
+Lyrics:
+[Intro]
+(잔잔한 피아노)
+
+[Verse 1]
+세상의 풍파 속에서
+주님만 바라봅니다
+흔들리는 마음 위에
+주의 평안 임하소서
+
+[Chorus]
+주의 평안 속에 거하리
+두려움 물러가고
+오직 주만 의지하리
+영원토록 신실하신 주</div></div></div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">실습 3</span><span class="prompt-card-title">AI로 가사 먼저 쓰고 → Suno에 넣기</span><span class="tool-badge">ChatGPT/Claude → Suno</span><button class="copy-btn" title="복사" onclick="copyFromCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">시편 23편을 주제로 현대 CCM 스타일의 찬양 가사를 써줘.
+
+구조: [Verse 1] → [Pre-Chorus] → [Chorus] → [Verse 2] → [Chorus] → [Bridge] → [Outro]
+톤: 평안하고 신뢰감 있는
+후렴구에 "여호와는 나의 목자시니" 핵심 메시지를 녹여줘
+Suno AI에 바로 넣을 수 있는 형식으로
+
+→ 완성된 가사를 Suno에 붙여넣으면 음악이 만들어집니다!</div></div>
+  <div class="var-toggle" onclick="toggleVar(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>시즌별 스타일 태그</div><div class="var-list"><div class="var-item"><div class="var-item-header"><span class="var-badge">성탄</span><span class="var-label">Christmas</span></div><div class="var-prompt" onclick="copyText(this)">Korean Christmas carol, joyful, festive, warm orchestral, choir, bells, celebratory, medium tempo</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">부활</span><span class="var-label">Easter</span></div><div class="var-prompt" onclick="copyText(this)">Korean Easter hymn, triumphant, powerful choir, orchestral, hopeful, majestic, inspiring</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">감사</span><span class="var-label">Thanksgiving</span></div><div class="var-prompt" onclick="copyText(this)">thanksgiving, warm, acoustic, folk, gentle, grateful, heartfelt</div></div><div class="var-item"><div class="var-item-header"><span class="var-badge">청년</span><span class="var-label">Modern Worship</span></div><div class="var-prompt" onclick="copyText(this)">modern worship, contemporary, band, electric guitar, drums, passionate, 100 BPM</div></div></div></div>
+</div>
+
+<!-- ── TIPS ── -->
+<div class="section" id="sec-tips">
+  <div class="session-header"><div class="session-num" style="background:var(--gold)">💡</div><h2>AI에게 잘 묻는 법 — 프롬프트 5대 원칙</h2></div>
+  <div class="info-box gold"><strong>핵심 메시지</strong> — 프롬프트는 코딩이 아닙니다. <em>'대화하는 언어'</em>입니다. 아래 5가지만 기억하면 같은 도구로 10배 다른 결과를 만들 수 있습니다.</div>
+
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">01</span><span class="prompt-card-title">역할을 부여하라</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">너는 한국 교회에서 20년간 사역한 경험이 있는 성경공부 전문가야. 개혁주의 신학에 기반하여 30대 직장인 성도들이 이해하기 쉬운 언어로 성경을 설명해줘.</div></div></div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">02</span><span class="prompt-card-title">맥락을 제공하라</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">우리 교회 청년부는 20~30대 직장인 약 30명으로 구성되어 있어. 매주 금요일 저녁에 모이고, 최근 "일과 신앙의 균형"에 대한 관심이 높아. 이 맥락을 고려해서 답변해줘.</div></div></div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">03</span><span class="prompt-card-title">출력 형식을 지정하라</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">결과를 다음 형식으로 정리해줘:
+- 핵심 메시지: 한 줄로
+- 성경 근거: 2~3개 구절
+- 적용 질문: 2개
+- 기도 포인트: 1개
+분량은 A4 한 페이지 이내로</div></div></div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-gold">04</span><span class="prompt-card-title">제약 조건을 명시하라</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">주의사항:
+- 확실하지 않은 성경 해석에는 [확인 필요]를 표시해줘
+- 특정 교단의 입장이 아닌 범복음주의적 관점으로
+- 개역개정 성경 표현을 기준으로
+- 실명이나 개인정보는 절대 포함하지 마</div></div></div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-plum">05</span><span class="prompt-card-title">검증 요청을 추가하라</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">이 답변에서 틀릴 수 있는 부분을 스스로 지적해줘. 특히:
+- 성경 구절 인용이 정확한지
+- 역사적 사실이 검증 가능한지
+- 신학적으로 논쟁이 있는 해석인지
+확실하지 않은 부분은 솔직하게 말해줘</div></div></div>
+</div>
+
+<!-- ── ETHICS ── -->
+<div class="section" id="sec-ethics">
+  <div class="session-header"><div class="session-num" style="background:var(--coral)">⚠️</div><h2>AI 활용 주의사항 & 신앙생활 3원칙</h2></div>
+
+  <div class="section-divider">달란트를 지혜롭게 사용하기 위한 3원칙</div>
+  <div class="info-box gold"><strong>① 기도</strong> — 사용 전후에 기도하기. "주님, 이 도구가 복음 전파에 사용되게 해주세요."<br><br><strong>② 검증</strong> — 결과물 철저히 확인하기. 성경, 교리, 교단 신학과 일치하는지 확인.<br><br><strong>③ 투명</strong> — 사용 사실 밝히기. "이 자료는 AI 도움을 받아 작성했으며, 신학적으로 검토했습니다."</div>
+
+  <div class="section-divider">반드시 지켜야 할 3가지</div>
+  <div class="info-box warn"><strong style="color:var(--coral)">① 개인정보 입력 금지</strong><br>✖ "박성도 집사님이 우울증으로 상담받고 계신데, 어떻게 도와줄까?"<br>✔ "우울증으로 힘들어하는 성도를 상담할 때 목회적 조언을 해줘"<br><br><strong style="color:var(--coral)">② 신학 내용 맹신 금지</strong><br>✖ AI 응답을 진리로 여기며 따르거나 타인에게 전파<br>✔ "목사님, AI에서 이런 답변을 봤는데 어떤가요?"<br><br><strong style="color:var(--coral)">③ AI 의존성 경계</strong><br>✖ 기도 없이 AI로만 설교문 작성<br>✔ 기도 + 성령의 인도 + AI 보조</div>
+
+  <div class="section-divider">신학적 필터링 3단계</div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-navy">1단계</span><span class="prompt-card-title">의심하기 — 구체적 사실은 일단 의심</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">☐ 성경 구절 번호가 정확한가? (개역개정으로 직접 확인)
+☐ 인물·지명·사건이 실재하는가?
+☐ 인용한 책·논문·통계의 출처가 있는가?</div></div></div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-sage">2단계</span><span class="prompt-card-title">교차 검증 — 2개 이상 신뢰할 수 있는 출처로 확인</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">방금 알려준 내용의 출처를 알려줘. 어디서 이 정보를 가져온 거야?
+그리고 이 해석에 대해 다른 견해가 있다면 함께 알려줘.</div></div></div>
+  <div class="prompt-card"><div class="prompt-card-header"><span class="prompt-step step-coral">3단계</span><span class="prompt-card-title">신학적 판단 — 내 신앙고백과 교단 노선에 부합하는가?</span></div><div class="prompt-body"><div class="prompt-text" onclick="copyText(this)">스스로에게 묻기:
+☐ 이 해석이 성경 전체의 가르침과 조화를 이루는가?
+☐ 지나치게 자극적이거나 복음의 본질을 왜곡할 소지는 없는가?
+☐ 우리 교회 성도들의 신앙 수준과 정서에 적합한 내용인가?
+→ 최종 책임과 판단은 AI가 아닌 나에게 있습니다.</div></div></div>
+</div>
+
+</div><!-- panel-scenario -->
+
+<!-- ═══════════════════════════════ -->
+<!-- MODE 2: 도구별 -->
+<!-- ═══════════════════════════════ -->
+<div class="mode-panel" id="panel-tools">
+
+<div class="tool-grid">
+  <div class="tool-card" onclick="toggleAccordion('chatgpt')" id="card-chatgpt"><div class="tool-icon">🤖</div><div class="tool-tag" style="color:var(--sage)">ALL-IN-ONE</div><div class="tool-name">ChatGPT</div><div class="tool-desc">글쓰기, 이미지 생성·편집, 음성 대화, 파일 분석</div><div class="tool-pills"><span class="pill" style="background:var(--sage-light);color:#3A5C48">6 프롬프트</span></div></div>
+  <div class="tool-card" onclick="toggleAccordion('claude')" id="card-claude"><div class="tool-icon">🧡</div><div class="tool-tag" style="color:var(--coral)">분석·글쓰기</div><div class="tool-name">Claude</div><div class="tool-desc">깊이 있는 분석, 긴 문서 처리, 정확한 글쓰기</div><div class="tool-pills"><span class="pill" style="background:var(--coral-light);color:#A14030">4 프롬프트</span></div></div>
+  <div class="tool-card" onclick="toggleAccordion('gemini')" id="card-gemini"><div class="tool-icon">✨</div><div class="tool-tag" style="color:var(--sky)">구글 연동 + 이미지</div><div class="tool-name">Gemini</div><div class="tool-desc">실시간 검색, Nano Banana 이미지 생성·편집, 유튜브 요약</div><div class="tool-pills"><span class="pill" style="background:var(--sky-light);color:#2A6A90">5 프롬프트</span></div></div>
+</div>
+<div class="tool-grid">
+  <div class="tool-card" onclick="toggleAccordion('suno')" id="card-suno"><div class="tool-icon">🎵</div><div class="tool-tag" style="color:var(--navy)">음악</div><div class="tool-name">Suno AI</div><div class="tool-desc">찬양 작곡, 배경음악 제작, 어린이 찬양</div><div class="tool-pills"><span class="pill" style="background:var(--navy-light);color:var(--navy)">3 프롬프트</span></div></div>
+  <div class="tool-card" onclick="toggleAccordion('nbm')" id="card-nbm"><div class="tool-icon">📒</div><div class="tool-tag" style="color:#E65100">리서치</div><div class="tool-name">NotebookLM</div><div class="tool-desc">문서 기반 Q&A, 설교 아카이빙, 팟캐스트 생성</div><div class="tool-pills"><span class="pill" style="background:#FFF3E0;color:#E65100">3 프롬프트</span></div></div>
+</div>
+
+<!-- ChatGPT -->
+<div class="accordion" id="acc-chatgpt"><div class="accordion-inner">
+<div class="tool-links"><a href="https://chat.openai.com" target="_blank" class="tool-link chatgpt">🤖 ChatGPT 열기 ↗</a></div>
+<div class="info-box"><strong>ChatGPT 특징</strong> — GPT-4o/GPT-5 기반. 이미지 생성·편집(한글 텍스트 정확 렌더링!), 음성 대화, 파일 업로드 분석, 웹 검색. 무료 사용자도 이미지 생성 가능(일일 제한 있음).</div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">1</span><span class="prompt-badge chatgpt">ChatGPT</span><span class="prompt-title">성경 인물 탐구 — 대화형 학습</span></div><div class="prompt-body" onclick="copyText(this)">모세의 생애를 시간순으로 정리해줘. 시기별로 나누어 (탄생~광야~출애굽~시내산~가나안 앞) 각 시기의 핵심 사건 1~2개와 오늘 우리에게 주는 교훈 한 줄씩. A4 한 페이지 이내.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">2</span><span class="prompt-badge chatgpt">ChatGPT</span><span class="prompt-title">이미지 생성 — 교회 행사 포스터</span></div><div class="prompt-body" onclick="copyText(this)">여름성경학교 포스터를 만들어줘. 제목: "하나님의 용사! VBS 2026", 날짜: 8월 4~6일, 시간: 오전 9시~12시. 밝고 활기찬 여름 모험 테마, 만화 스타일, 한글 텍스트 정확하게, 세로 3:4 비율.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">3</span><span class="prompt-badge chatgpt">ChatGPT</span><span class="prompt-title">이미지 생성 — 성경 말씀 카드</span></div><div class="prompt-body" onclick="copyText(this)">카카오톡 공유용 성경 말씀 카드를 만들어줘. 텍스트: "잘하였도다 착하고 충성된 종아 네가 적은 일에 충성하였으매 내가 많은 것을 네게 맡기리니" — 마태복음 25:21. 따뜻한 크림/골드 톤, 깔끔하고 절제된 느낌, 정사각형.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">4</span><span class="prompt-badge chatgpt">ChatGPT</span><span class="prompt-title">사진 편집 — 스타일 변환</span></div><div class="prompt-body" onclick="copyText(this)">[📸 교회 건물/모임 사진 업로드 후] 이 사진을 따뜻한 수채화 스타일의 일러스트로 변환해줘. 주보 표지에 사용할 수 있는 느낌으로.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">5</span><span class="prompt-badge chatgpt">ChatGPT</span><span class="prompt-title">문서 분석 — 회의록 요약</span></div><div class="prompt-body" onclick="copyText(this)">[📎 회의록 파일 업로드 후] 이 회의록에서 핵심 결정 사항, 미결 사항, 담당자와 기한, 다음 회의 확인 사항을 표로 정리해줘.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">6</span><span class="prompt-badge chatgpt">ChatGPT</span><span class="prompt-title">번역 — 선교 편지 영문 작성</span></div><div class="prompt-body" onclick="copyText(this)">"지난 한 달간 현지 교회와 청소년 캠프를 진행, 50명 참가, 12명 처음 복음 접함. 다음 달 의료봉사 계획. 기도 부탁." — 이 내용을 선교 후원자에게 보내는 자연스러운 영어 편지로 번역해줘. 기도 요청 부각.</div></div>
+</div></div>
+
+<!-- Claude -->
+<div class="accordion" id="acc-claude"><div class="accordion-inner">
+<div class="tool-links"><a href="https://claude.ai" target="_blank" class="tool-link claude">🧡 Claude 열기 ↗</a></div>
+<div class="info-box"><strong>Claude 특징</strong> — 긴 문서 분석에 강점. 정확하고 균형 잡힌 글쓰기. 한국어 능력 우수. 복잡한 신학적 질문에도 뉘앙스 있는 답변.</div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">1</span><span class="prompt-badge claude">Claude</span><span class="prompt-title">주석가별 견해 비교</span></div><div class="prompt-body" onclick="copyText(this)">로마서 8:28-30 본문에 대해 핵심 헬라어 단어 분석, 주요 신학자들의 해석 비교 (칼빈, 매튜 헨리, 존 맥아더), 현대 한국 교회 성도에게 적용 포인트 3가지를 정리해줘. 확실하지 않은 해석에는 [확인 필요] 표시.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">2</span><span class="prompt-badge claude">Claude</span><span class="prompt-title">제자훈련 12주 커리큘럼</span></div><div class="prompt-body" onclick="copyText(this)">12주 과정 제자훈련 커리큘럼 설계. 대상: 세례 1~3년 성도, 1회 90분. 1~4주: 신앙 기초, 5~8주: 성장 실제, 9~12주: 삶의 적용. 주차별 주제, 핵심 본문, 학습 목표, 실천 과제를 표 형태로.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">3</span><span class="prompt-badge claude">Claude</span><span class="prompt-title">한국 기독교 역사 정리</span></div><div class="prompt-body" onclick="copyText(this)">한국 기독교 역사를 10개 핵심 사건으로 정리. 각 사건: 연도, 핵심 인물, 3줄 요약, 오늘 시사점 1줄. 시간순.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">4</span><span class="prompt-badge claude">Claude</span><span class="prompt-title">감사편지 / 위로편지 작성</span></div><div class="prompt-body" onclick="copyText(this)">은퇴하시는 장로님께 감사 편지 초안. 30년 헌신, 구체적 사역(새벽기도, 선교위원장, 성가대 후원), 성경 인용 1개, 건강·은혜 기원 마무리. 격식+따뜻한 톤, 400자 내외.</div></div>
+</div></div>
+
+<!-- Gemini -->
+<div class="accordion" id="acc-gemini"><div class="accordion-inner">
+<div class="tool-links"><a href="https://gemini.google.com" target="_blank" class="tool-link gemini">✨ Gemini 열기 ↗</a></div>
+<div class="info-box"><strong>Gemini 특징</strong> — 구글 서비스 연동, 실시간 검색, <strong>Nano Banana 이미지 생성·편집</strong>(무료 하루 20장, 대화형 수정 가능), 유튜브 영상 요약.</div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">1</span><span class="prompt-badge gemini">Gemini</span><span class="prompt-title">이미지 생성 — 교회학교 삽화</span></div><div class="prompt-body" onclick="copyText(this)">달란트 비유(마태복음 25:14-30) 어린이 교재 삽화를 만들어줘. 주인이 세 종에게 금화 주머니를 나눠주는 장면. 따뜻한 수채화 스타일, 어린이 그림책 느낌. → 생성 후 "종의 표정을 더 밝게" 같이 대화로 수정 가능!</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">2</span><span class="prompt-badge gemini">Gemini</span><span class="prompt-title">이미지 생성 — SNS 카드뉴스 시리즈</span></div><div class="prompt-body" onclick="copyText(this)">"감사" 주제 인스타그램 카드뉴스 이미지 5장 시리즈. 1장: 제목, 2장: 과학적 효과, 3장: 살전 5:18, 4장: 실천 습관 3가지, 5장: 기도문. 파스텔 톤, 한글 텍스트, 정사각형.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">3</span><span class="prompt-badge gemini">Gemini</span><span class="prompt-title">최신 기독교 뉴스 리서치</span></div><div class="prompt-body" onclick="copyText(this)">최근 한국 교회 관련 주요 뉴스 5가지를 정리해줘. 각각 제목, 날짜, 핵심 내용 2줄, 성도로서 관심 포인트. 출처 포함.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">4</span><span class="prompt-badge gemini">Gemini</span><span class="prompt-title">유튜브 설교 영상 요약</span></div><div class="prompt-body" onclick="copyText(this)">[유튜브 설교 링크 붙여넣기] 이 설교의 본문 말씀, 설교 제목, 핵심 메시지 3줄, 주요 포인트(대지), 인상적인 예화를 정리해줘.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">5</span><span class="prompt-badge gemini">Gemini</span><span class="prompt-title">성지순례 여행 계획</span></div><div class="prompt-body" onclick="copyText(this)">이스라엘 성지순례 10일 일정. 주요 성경 장소 포함, 각 장소에서 읽을 성경 구절 추천, 효율적 동선, 예상 비용(2026년 기준), 여행 팁. 표 형태로 일자별 정리.</div></div>
+</div></div>
+
+<!-- Suno -->
+<div class="accordion" id="acc-suno"><div class="accordion-inner">
+<div class="tool-links"><a href="https://suno.com" target="_blank" class="tool-link suno">🎵 Suno AI 열기 ↗</a></div>
+<div class="info-box"><strong>Suno AI</strong> — 텍스트로 가사+스타일을 입력하면 실제 음악 생성. 무료 하루 10곡. Custom 모드에서 Style, Title, Lyrics 입력.</div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">1</span><span class="prompt-badge suno">Suno</span><span class="prompt-title">어린이 찬양</span></div><div class="prompt-body" onclick="copyText(this)">Style: Korean children's worship, energetic, fun, upbeat children's choir, acoustic guitar, drums, bright, 120 BPM
+Title: 하나님의 용사
+[Verse 1] 다윗처럼 담대하게 / 두려움을 이겨내요 / 하나님이 함께하면 / 무엇이든 할 수 있어
+[Chorus] 우리는 하나님의 용사 / 세상을 밝히는 빛</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">2</span><span class="prompt-badge suno">Suno</span><span class="prompt-title">예배 워십 찬양</span></div><div class="prompt-body" onclick="copyText(this)">Style: worship, CCM, reverent, peaceful, piano, strings, gentle female vocal, 80 BPM
+Title: 주의 평안 속에
+[Verse 1] 세상의 풍파 속에서 / 주님만 바라봅니다
+[Chorus] 주의 평안 속에 거하리 / 두려움 물러가고 / 오직 주만 의지하리</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">3</span><span class="prompt-badge suno">Suno</span><span class="prompt-title">성탄 캐롤</span></div><div class="prompt-body" onclick="copyText(this)">Style: Korean Christmas carol, joyful, festive, warm orchestral, choir, bells, medium tempo
+Title: 아기 예수 오신 날
+[Intro] (은은한 벨+오케스트라)
+[Verse 1] 별빛 가득한 밤하늘 아래 / 작은 구유에 오신 임마누엘
+[Chorus] 기뻐하라 노래하라 / 구주가 오셨네</div></div>
+</div></div>
+
+<!-- NotebookLM -->
+<div class="accordion" id="acc-nbm"><div class="accordion-inner">
+<div class="tool-links"><a href="https://notebooklm.google.com" target="_blank" class="tool-link nbm">📒 NotebookLM 열기 ↗</a></div>
+<div class="info-box"><strong>NotebookLM</strong> — 업로드한 문서 안에서만 답변 → 환각(거짓 정보) 최소화. 설교 원고, 교회 규정집, 주석서 올리고 Q&A. 팟캐스트 기능으로 오디오 요약 자동 생성!</div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">1</span><span class="prompt-badge nbm">NotebookLM</span><span class="prompt-title">설교 원고 아카이빙 → Q&A</span></div><div class="prompt-body" onclick="copyText(this)">[설교 원고 여러 편 업로드 후] "사랑" 주제 설교 몇 편? 가장 많이 인용된 성경 구절 Top 5? 반복 키워드? 로마서 설교 핵심 메시지 각 한 줄 요약?</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">2</span><span class="prompt-badge nbm">NotebookLM</span><span class="prompt-title">교회 헌법/정관 Q&A</span></div><div class="prompt-body" onclick="copyText(this)">[교회 헌법·정관 업로드 후] 장로 피선 자격은? 임시 당회 소집 요건은? 재정 결산 보고 절차는? 근거 조항 번호 인용.</div></div>
+<div class="prompt-block"><div class="prompt-header"><span class="prompt-num">3</span><span class="prompt-badge nbm">NotebookLM</span><span class="prompt-title">팟캐스트 — 오디오 요약 생성</span><span class="bonus-tag">추천</span></div><div class="prompt-body" onclick="copyText(this)">[문서 업로드 → "Audio Overview" 버튼 클릭]
+두 명의 진행자가 대화하는 형식의 오디오 요약이 자동 생성됩니다.
+활용: 주일설교→오디오 요약 배포, 성경공부 자료→통근길 오디오, 교회 보고서→오디오 브리핑</div></div>
+</div></div>
+
+</div><!-- panel-tools -->
+</div><!-- .main -->
+
+<div class="toast" id="toast">복사되었습니다 ✓</div>
+<div class="font-ctrl"><button onclick="changeFontSize(-1)">A-</button><button onclick="changeFontSize(1)">A+</button></div>
+
+<script>
+function switchMode(mode){document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+mode).classList.add('active');document.getElementById('scenario-nav').style.display=mode==='scenario'?'flex':'none';document.querySelectorAll('.accordion').forEach(a=>{a.classList.remove('open');a.style.maxHeight='0'});document.querySelectorAll('.tool-card').forEach(c=>c.classList.remove('active'));window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('#panel-scenario .section').forEach(s=>s.classList.remove('active'));btn.classList.add('active');document.getElementById('sec-'+btn.dataset.tab).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})})});
+function toggleAccordion(id){const acc=document.getElementById('acc-'+id);const card=document.getElementById('card-'+id);const isOpen=acc.classList.contains('open');document.querySelectorAll('.accordion').forEach(a=>{a.classList.remove('open');a.style.maxHeight='0'});document.querySelectorAll('.tool-card').forEach(c=>c.classList.remove('active'));if(!isOpen){acc.classList.add('open');acc.style.maxHeight=acc.scrollHeight+'px';if(card)card.classList.add('active');setTimeout(()=>acc.scrollIntoView({behavior:'smooth',block:'nearest'}),100)}}
+function toggleVar(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('open')}
+function copyText(el){const text=el.textContent.replace('클릭하여 복사','').trim();navigator.clipboard.writeText(text).then(()=>showToast())}
+function copyFromCard(btn){const card=btn.closest('.prompt-card');const textEl=card.querySelector('.prompt-text');if(textEl){navigator.clipboard.writeText(textEl.textContent.trim()).then(()=>{btn.classList.add('copied');showToast();setTimeout(()=>btn.classList.remove('copied'),1500)})}}
+let toastTimer;function showToast(){const t=document.getElementById('toast');t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
+let currentSize=15;function changeFontSize(delta){currentSize=Math.max(12,Math.min(20,currentSize+delta));document.body.style.fontSize=currentSize+'px'}
+</script>
+</body>
+</html>
